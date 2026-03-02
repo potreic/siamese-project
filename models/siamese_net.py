@@ -37,35 +37,35 @@ class SiameseNetwork(nn.Module):
             nn.Sigmoid()
         )
 
-    def _initialize_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.normal_(m.weight, mean=0, std=1e-2)
-                if m.bias is not None:
-                    nn.init.normal_(m.bias, mean=0.5, std=1e-2)
-            elif isinstance(m, nn.Linear):
-                if m.out_features == 4096:
-                    nn.init.normal_(m.weight, mean=0, std=2e-1)
-                    nn.init.normal_(m.bias, mean=0.5, std=1e-2)
-                else:
-                    nn.init.normal_(m.weight, mean=0, std=2e-1)
-                    nn.init.normal_(m.bias, mean=0.5, std=1e-2)
+    # def _initialize_weights(self):
+    #     for m in self.modules():
+    #         if isinstance(m, nn.Conv2d):
+    #             nn.init.normal_(m.weight, mean=0, std=1e-2)
+    #             if m.bias is not None:
+    #                 nn.init.normal_(m.bias, mean=0.5, std=1e-2)
+    #         elif isinstance(m, nn.Linear):
+    #             if m.out_features == 4096:
+    #                 nn.init.normal_(m.weight, mean=0, std=2e-1)
+    #                 nn.init.normal_(m.bias, mean=0.5, std=1e-2)
+    #             else:
+    #                 nn.init.normal_(m.weight, mean=0, std=2e-1)
+    #                 nn.init.normal_(m.bias, mean=0.5, std=1e-2)
 
-    def forward(self, x1, x2):
-        out1 = self.forward_one(x1)
-        out2 = self.forward_one(x2)
+    # def forward(self, x1, x2):
+    #     out1 = self.forward_one(x1)
+    #     out2 = self.forward_one(x2)
         
-        l1_distance = torch.abs(out1-out2)
+    #     l1_distance = torch.abs(out1-out2)
 
-        output = self.out(l1_distance)
-        return output
+    #     output = self.out(l1_distance)
+    #     return output
     
-model = SiameseNetwork()
+# model = SiameseNetwork()
 
-batch_size = 128
-criterion = nn.BCELoss()
-initial_lr = 0.01
-l2_penalty = 0.05
+# batch_size = 128
+# criterion = nn.BCELoss()
+# initial_lr = 0.01
+# l2_penalty = 0.05
 
-optimizer = optim.SGD(model.parameters(), lr=initial_lr, momentum=0.5, weight_decay=l2_penalty)
-lr_scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
+# optimizer = optim.SGD(model.parameters(), lr=initial_lr, momentum=0.5, weight_decay=l2_penalty)
+# lr_scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.99)
