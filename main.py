@@ -26,8 +26,11 @@ def main():
     # split the data into a 40 alphabet background set and a 10 alphabet evaluation set
     data_loader = OmniglotDataLoader(background_dir=bg_path, evaluation_dir=eval_path, batch_size=128)
     
-    train_loader = data_loader.get_train_loader(num_pairs=90000)
-    logger.info("Successfully initialized DataLoaders with affine augmentation.")
+    train_loader, val_loader = data_loader.get_verification_loaders()
+    logger.info("Successfully initialized Train and Validation DataLoaders with strict drawer splitting.")
+
+    # train_loader = data_loader.get_train_loader(num_pairs=90000)
+    # logger.info("Successfully initialized DataLoaders with affine augmentation.")
 
     logger.info("=== MODEL & HYPERPARAMETERS INITIALIZATION ===")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -42,7 +45,7 @@ def main():
     # We trained each network for a maximum of 200 epochs
     best_model_weights = trainer.train(max_epochs=200)
     model.load_state_dict(best_model_weights)
-    
+
     # final evaluation
     logger.info("=== FINAL ONE-SHOT EVALUATION ===")
     evaluator = Evaluator(model=model, evaluation_dir=eval_path)
