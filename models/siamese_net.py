@@ -37,28 +37,32 @@ class SiameseNetwork(nn.Module):
             nn.Sigmoid()
         )
 
-    # def _initialize_weights(self):
-    #     for m in self.modules():
-    #         if isinstance(m, nn.Conv2d):
-    #             nn.init.normal_(m.weight, mean=0, std=1e-2)
-    #             if m.bias is not None:
-    #                 nn.init.normal_(m.bias, mean=0.5, std=1e-2)
-    #         elif isinstance(m, nn.Linear):
-    #             if m.out_features == 4096:
-    #                 nn.init.normal_(m.weight, mean=0, std=2e-1)
-    #                 nn.init.normal_(m.bias, mean=0.5, std=1e-2)
-    #             else:
-    #                 nn.init.normal_(m.weight, mean=0, std=2e-1)
-    #                 nn.init.normal_(m.bias, mean=0.5, std=1e-2)
+        self._initialize_weights()
 
-    # def forward(self, x1, x2):
-    #     out1 = self.forward_one(x1)
-    #     out2 = self.forward_one(x2)
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.normal_(m.weight, mean=0, std=1e-2)
+                if m.bias is not None:
+                    nn.init.normal_(m.bias, mean=0.5, std=1e-2)
+            elif isinstance(m, nn.Linear):
+                nn.init.normal_(m.weight, mean=0, std=2e-1)
+                nn.init.normal_(m.bias, mean=0.5, std=1e-2)
+
+    def forward_one(self, x):
+        x = self.conv_sequential(x)
+        x = x.view(x.size()[0], -1) 
+        x = self.fc(x)
+        return x             
+
+    def forward(self, x1, x2):
+        out1 = self.forward_one(x1)
+        out2 = self.forward_one(x2)
         
-    #     l1_distance = torch.abs(out1-out2)
+        l1_distance = torch.abs(out1-out2)
 
-    #     output = self.out(l1_distance)
-    #     return output
+        output = self.out(l1_distance)
+        return output
     
 # model = SiameseNetwork()
 
