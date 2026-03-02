@@ -1,11 +1,13 @@
 import logging
 import os
 import torch
+
+# Import from custom modules
+from utils.logger import setup_logger
 from data.dataset import OmniglotDataLoader
 from models.siamese_net import SiameseNetwork
 from training.trainer import Trainer
 from training.evaluator import Evaluator
-from utils.logger import setup_logger
 
 def main():
     # Initialize neat formatted logger
@@ -39,14 +41,15 @@ def main():
 
     # We trained each network for a maximum of 200 epochs
     best_model_weights = trainer.train(max_epochs=200)
-
+    model.load_state_dict(best_model_weights)
+    
     # final evaluation
     logger.info("=== FINAL ONE-SHOT EVALUATION ===")
     evaluator = Evaluator(model=model, evaluation_dir=eval_path)
     
     # This constitutes a total of 400 one-shot learning trials, from which the classification accuracy is calculated.
     final_accuracy = evaluator.evaluate_20_way_one_shot(trials=400)
-    
+
     logger.info(f"Final One-Shot Accuracy: {final_accuracy:.2f}%")
     logger.info("=== EXPERIMENT COMPLETE ===")
 
