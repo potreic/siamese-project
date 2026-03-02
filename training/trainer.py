@@ -114,11 +114,15 @@ class Trainer:
                 # 4. Pick 2 drawers exclusively from the validation set's drawers
                 drawer1, drawer2 = random.sample(val_dataset.drawers_list, 2)
                 
+                # Format them as strings to match the end of the filename (e.g., '_13.png')
+                d1_suffix = f"_{drawer1:02d}.png"
+                d2_suffix = f"_{drawer2:02d}.png"
+
                 # Load test image (Drawer 1)
-                test_imgs = sorted(os.listdir(true_char_path))
-                # Ensure the drawer index doesn't exceed available images
-                d1_idx = drawer1 if drawer1 < len(test_imgs) else 0 
-                test_img_path = os.path.join(true_char_path, test_imgs[d1_idx])
+                all_test_imgs = os.listdir(true_char_path)
+                test_img_name = next(img for img in all_test_imgs if img.endswith(d1_suffix))
+                test_img_path = os.path.join(true_char_path, test_img_name)
+
                 test_img = to_tensor(Image.open(test_img_path).convert('L')).unsqueeze(0).to(device)
                 
                 # Load support set (Drawer 2)
@@ -129,9 +133,9 @@ class Trainer:
                     if char_path == true_char_path:
                         true_class_index = i
                         
-                    char_imgs = sorted(os.listdir(char_path))
-                    d2_idx = drawer2 if drawer2 < len(char_imgs) else 0
-                    supp_img_path = os.path.join(char_path, char_imgs[d2_idx])
+                    all_char_imgs = os.listdir(char_path)
+                    supp_img_name = next(img for img in all_char_imgs if img.endswith(d2_suffix))
+                    supp_img_path = os.path.join(char_path, supp_img_name)
                     
                     supp_img = to_tensor(Image.open(supp_img_path).convert('L')).to(device)
                     support_set.append(supp_img)

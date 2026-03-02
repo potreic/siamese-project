@@ -27,10 +27,18 @@ class OmniglotDataset(Dataset):
         return self.num_pairs
     
     def _get_drawer_images(self, char_path):
-        """Helper to filter images by the assigned drawers."""
+        """Helper to filter images by explicitly reading the _XX.png drawer ID."""
         all_images = os.listdir(char_path)
-        all_images.sort() 
-        return [all_images[i] for i in self.drawers_list if i < len(all_images)]
+        valid_images = []
+        for img_name in all_images:
+            try:
+                # Extracts '01' from '0709_01.png' and converts to integer 1
+                drawer_id = int(img_name.split('_')[-1].split('.')[0])
+                if drawer_id in self.drawers_list:
+                    valid_images.append(img_name)
+            except ValueError:
+                continue # Skip files that don't match the format
+        return valid_images
     
     def __getitem__(self, idx):
         # The verification model learns to identify input pairs according to the probability that they belong to the same class or different classes
@@ -106,11 +114,11 @@ class OmniglotDataLoader:
         
         # We set aside sixty percent of the total data for training: 30 alphabets out of 50 and 12 drawers out of 20
         train_alphabets = all_background_alphabets[:30]
-        train_drawers = list(range(0, 12)) # Indices 0 through 11 represent the first 12 drawers
+        train_drawers = list(range(1, 13)) # Indices 0 through 11 represent the first 12 drawers
 
         # First, we created a validation set for verification with 10,000 example pairs taken from 10 alphabets and 4 additional drawers
         val_alphabets = all_background_alphabets[30:40]
-        val_drawers = list(range(12, 16)) # Indices 12 through 15 represent the next 4 drawers
+        val_drawers = list(range(13, 17)) # Indices 12 through 15 represent the next 4 drawers
 
         self.logger.info(f"Training: {len(train_alphabets)} alphabets, 12 drawers.")
         self.logger.info(f"Validation: {len(val_alphabets)} alphabets, 4 drawers.")

@@ -44,13 +44,16 @@ class Evaluator:
 
                 # 4. "Two of the twenty drawers are also selected" [cite: 244, 245]
                 # Pick two different images of the true character (representing 2 drawers)
-                images = os.listdir(true_char_path)
-                img1_name, img2_name = random.sample(images, 2)
+                drawer1, drawer2 = random.sample(range(1, 21), 2)
+                d1_suffix = f"_{drawer1:02d}.png"
+                d2_suffix = f"_{drawer2:02d}.png"
 
-                # Load the test image (Drawer 1)
-                test_img_path = os.path.join(true_char_path, img1_name)
+                #Load the test image (Drawer 1)
+                all_test_imgs = os.listdir(true_char_path)
+                test_img_name = next(img for img in all_test_imgs if img.endswith(d1_suffix))
+                test_img_path = os.path.join(true_char_path, test_img_name)
                 test_image = Image.open(test_img_path).convert('L')
-                test_tensor = self.transform(test_image).unsqueeze(0).to(device) # Shape: (1, 1, 105, 105)
+                test_tensor = self.transform(test_image).unsqueeze(0).to(device)
 
                 #5. Build the support set (Drawer 2)
                 support_set = []
@@ -58,15 +61,17 @@ class Evaluator:
 
                 for i, char in enumerate(sampled_characters):
                     char_path = os.path.join(alphabet_path, char)
+                    all_char_imgs = os.listdir(char_path)
+
                     if char == true_character:
                         # Use the second drawer's image for the correct class
-                        support_img_path = os.path.join(char_path, img2_name)
+                        supp_img_name = next(img for img in all_char_imgs if img.endswith(d2_suffix))
                         true_class_index = i
                     else:
                         # Pick a random drawer for the incorrect classes
-                        char_images = os.listdir(char_path)
-                        support_img_path = os.path.join(char_path, random.choice(char_images))
+                        supp_img_name = next(img for img in all_char_imgs if img.endswith(d2_suffix))
 
+                    support_img_path = os.path.join(char_path, supp_img_name)
                     support_img = Image.open(support_img_path).convert('L')
                     support_tensor = self.transform(support_img)
                     support_set.append(support_tensor)  
